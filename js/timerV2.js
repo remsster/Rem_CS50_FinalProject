@@ -5,9 +5,16 @@ let resetTimerButton = undefined;
 let skipSessionButton = undefined;
 let statsButton = undefined;
 let settingsButton = undefined;
+let saveChangesButton = undefined;
+
 let promodoroTag = undefined;
 let modalTitleTag = undefined;
 let sessionTitle = undefined;
+
+let workInput = undefined;
+let shortBreakInput = undefined;
+let longBreakInput = undefined;
+let breakIntervalInput = undefined;
 
 
 let minutes = 0;
@@ -16,6 +23,7 @@ let pastTime = 0;
 let running = false;
 let isReset = true;
 let skipped = false;
+let longBreakInterval = 4;
 
 
 // Date objects
@@ -61,6 +69,12 @@ document.addEventListener("DOMContentLoaded",() => {
     startTimerButton = document.querySelector("#start-timer-button");
     resetTimerButton = document.querySelector("#reset-timer-button");
     skipSessionButton = document.querySelector("#skip-session");
+    saveChangesButton = document.querySelector("#save-changes");
+
+    workInput = document.querySelector("#work-input");
+    shortBreakInput = document.querySelector("#short-break-input");
+    longBreakInput = document.querySelector("#long-break-input");
+    breakIntervalInput = document.querySelector("#break-interval-input");
 
     sessionTitle.innerHTML = currentState.title;
 
@@ -81,6 +95,18 @@ document.addEventListener("DOMContentLoaded",() => {
 
     resetTimerButton.addEventListener("click", resetTimer);
     skipSessionButton.addEventListener("click", skipSession);
+    
+    saveChangesButton.addEventListener("click", () => {
+        states.work.time = workInput.value ? Number(workInput.value) : 25;
+        states.shortBreak.time = shortBreakInput.value ? Number(shortBreakInput.value) : 5;
+        states.longBreak.time = longBreakInput.value ? Number(longBreakInput.value) : 15;
+        longBreakInput = breakIntervalInput.value ? Number(breakIntervalInput.value) : 4;
+        running = false;
+        startTimerButton.innerHTML = "Start";
+        clearInterval(timer);
+        resetTimer();
+        SetupSession();
+    });
 });
 
 function formatTime(minutes,seconds = 0) {
@@ -121,7 +147,7 @@ function finishSession() {
     promodoroTag.innerHTML = promodoro;
 
     if (currentState == states.work) {
-        if (promodoro % 4 == 0) {
+        if (promodoro % longBreakInterval == 0 && promodoro > 0) {
             currentState = states.longBreak;
         } else {
             currentState = states.shortBreak;
@@ -141,10 +167,12 @@ function SetupSession() {
 // button functions
 function startTimer() {
     if (isReset) {
+        // from beginning of timer
         currentTime = new Date();
         endTime = getStopTime(currentTime, currentState.time);
         isReset = false;
     } else {
+        // continueing timer
         currentTime = new Date();
         const minutes = Math.floor((pastTime % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((pastTime % (1000 * 60)) / 1000);
