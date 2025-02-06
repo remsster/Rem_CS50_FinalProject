@@ -7,6 +7,8 @@
         <link rel="stylesheet" href="css/styles.css"/>
         <!-- <script src="js/timer.js"></script> -->
          <script src="js/timerV2.js"></script>
+         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+         <script src="js/chart-data.js"></script>
     </head>
     <body>
         <nav class="custom-navbar">
@@ -74,15 +76,29 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Some Title</h1>
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Statistics</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <h2 class="display-6 chart-title"></h2>
+                        <canvas id="chart"></canvas>
 
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="task-select">Tasks</label>
+                            </div>
+                            <select class="custom-select" id="task-select">
+                                <option selected>Select task</option>
+                                <option value="python programming">No Task</option>
+                                <option value="chinese">Chinese</option>
+                            </select>
+                        </div>
+                        
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="save-changes">Save Changes</button>
+                        <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="save-changes">Save Changes</button> -->
+                         <button type="button" class="btn btn-primary" id="show-chart-data">Get data</button>
                         <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
                     </div>
                 </div>
