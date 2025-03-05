@@ -6,6 +6,12 @@ let skipSessionButton = undefined;
 let statsButton = undefined;
 let settingsButton = undefined;
 let saveChangesButton = undefined;
+let audioTag = undefined;
+let mainTaskSelectTag = undefined;
+let taskTitle = undefined;
+
+const focusAudio = "SFX_alert4.wav";
+const breakAudio = "SFX_increase1.wav";
 
 let promodoroTag = undefined;
 let modalTitleTag = undefined;
@@ -25,6 +31,7 @@ let isReset = true;
 let skipped = false;
 let longBreakInterval = 4;
 
+let currentTask = "None";
 
 // Date objects
 let currentTime = undefined;
@@ -32,11 +39,6 @@ let endTime = undefined;
 
 // SetInterval object
 let timer = undefined;
-
-// timers start points
-// let workTime = 1;
-// let shortBreak = 5
-// let longBreak = 15;
 
 // promodoro session count
 let promodoro = 0
@@ -60,6 +62,10 @@ let states = {
 
 // Initialize Variables
 document.addEventListener("DOMContentLoaded",() => {
+    
+
+    // console.log(promodoro);
+    
     currentState = states.work;
     timerContainer = document.querySelector(".timer");
     sessionTitle = document.querySelector(".session-title");
@@ -71,15 +77,22 @@ document.addEventListener("DOMContentLoaded",() => {
     skipSessionButton = document.querySelector("#skip-session");
     saveChangesButton = document.querySelector("#save-changes");
 
+    mainTaskSelectTag = document.querySelector("#task-select-main");
+    taskTitle = document.querySelector(".task-title");
+
+    audioTag = document.querySelector("#audio");
+    
     workInput = document.querySelector("#work-input");
     shortBreakInput = document.querySelector("#short-break-input");
     longBreakInput = document.querySelector("#long-break-input");
     breakIntervalInput = document.querySelector("#break-interval-input");
-
+    
     sessionTitle.innerHTML = currentState.title;
-
+    
     timerContainer.innerHTML = formatTime(currentState.time);
 
+    mainTaskSelectTag.addEventListener("change", changeTask);
+    
     startTimerButton.addEventListener("click", () => {
         running = !running;
         if (running) {
@@ -95,26 +108,31 @@ document.addEventListener("DOMContentLoaded",() => {
 
     resetTimerButton.addEventListener("click", resetTimer);
     skipSessionButton.addEventListener("click", skipSession);
-    
-    saveChangesButton.addEventListener("click", () => {
-        states.work.time = workInput.value ? Number(workInput.value) : 25;
-        states.shortBreak.time = shortBreakInput.value ? Number(shortBreakInput.value) : 5;
-        states.longBreak.time = longBreakInput.value ? Number(longBreakInput.value) : 15;
-        longBreakInput = breakIntervalInput.value ? Number(breakIntervalInput.value) : 4;
-        running = false;
-        startTimerButton.innerHTML = "Start";
-        clearInterval(timer);
-        resetTimer();
-        SetupSession();
+    saveChangesButton.addEventListener("click", saveChanges);
+
+    fetch("http://localhost:5000/current-task").then(response => {
+        if (!response.ok) {
+            throw new Error("Network response was to okay fetching todays data")
+        }
+        return response.json();
+    }).then(result => {
+        promodoro = result["promodoro"];
+        promodoroTag.innerHTML = promodoro;
+        // return result;
+    }).catch(err => {
+        console.error("Error: ", err);
     });
+
 });
 
+// Format time to look more presentable
 function formatTime(minutes,seconds = 0) {
     let minutesString = minutes < 10 ? "0" + String(minutes) : minutes;
     let secondsString = seconds < 10? "0" + String(seconds) : seconds;
     return `${minutesString}:${secondsString}`;
 }
 
+// Update the timer as time goes by
 function updateTimer() {
     currentTime = new Date();
     const timeLeft = Math.abs(endTime - currentTime);
@@ -128,6 +146,7 @@ function updateTimer() {
     }
 }
 
+// Return the time then the timer should end
 function getStopTime(startDT, minutes = 0, seconds = 0) {
     let end = startDT;
     end.setMinutes(end.getMinutes() + minutes);
@@ -135,17 +154,52 @@ function getStopTime(startDT, minutes = 0, seconds = 0) {
     return end;
 }
 
+// Cakked when the timer is fishined
 function finishSession() {
     clearInterval(timer);
     isReset = true;
     running = false;
     startTimerButton.innerHTML = "Start";
+
+    // If the current state is a work/focus session
+    // then send data to the server to be processed
     if (currentState == states.work && !skipped) {
+        // play focus audio
+        audioTag.src = "/static/audio/" + focusAudio;
+        audioTag.load();
+        audioTag.play();
         promodoro += 1;
+
+        const today = new Date();
+        fetch("http://localhost:5000/process",{
+            method: "POST",
+            body: JSON.stringify(
+                { 
+                    promodoroCount: promodoro,
+                    year: today.getFullYear(),
+                    month: today.getMonth() + 1,
+                    date: today.getDate(),
+                    task:  mainTaskSelectTag.value
+                }),
+            headers : {
+                "Content-type": "application/json; charset=utf-8"
+            }
+        });
     }
+
+    // Play break audio
+    if ((currentState == states.shortBreak || currentState == states.longBreak) && !skipped) {
+        audioTag.src = "/static/audio/" + breakAudio;
+        audioTag.load();
+        audioTag.play();
+    }
+    
+    // Set skipped back to false if session was skipped 
+    // and update promodoro count
     skipped = false;
     promodoroTag.innerHTML = promodoro;
 
+    // Set the next state
     if (currentState == states.work) {
         if (promodoro % longBreakInterval == 0 && promodoro > 0) {
             currentState = states.longBreak;
@@ -155,16 +209,44 @@ function finishSession() {
     } else {
         currentState = states.work;
     }
-
     SetupSession();
 }
 
+// Sets up the display for the new session
 function SetupSession() {
     timerContainer.innerHTML = formatTime(currentState.time);
     sessionTitle.innerHTML = currentState.title;
 }
 
-// button functions
+// ------------------------------------------------------
+// SELECT FUNCTIONS
+// ------------------------------------------------------
+
+function changeTask() {
+    console.log(mainTaskSelectTag.selectedIndex);
+    if (mainTaskSelectTag.value == "none") {
+        taskTitle.innerHTML = "";
+    } else {
+        taskTitle.innerHTML = mainTaskSelectTag.value;
+    }
+}
+
+// ------------------------------------------------------
+// BUTTON FUNCTIONS
+// ------------------------------------------------------
+
+function saveChanges() {
+    states.work.time = workInput.value ? Number(workInput.value) : 25;
+    states.shortBreak.time = shortBreakInput.value ? Number(shortBreakInput.value) : 5;
+    states.longBreak.time = longBreakInput.value ? Number(longBreakInput.value) : 15;
+    longBreakInput = breakIntervalInput.value ? Number(breakIntervalInput.value) : 4;
+    running = false;
+    startTimerButton.innerHTML = "Start";
+    clearInterval(timer);
+    resetTimer();
+    SetupSession();
+}
+
 function startTimer() {
     if (isReset) {
         // from beginning of timer
@@ -172,7 +254,7 @@ function startTimer() {
         endTime = getStopTime(currentTime, currentState.time);
         isReset = false;
     } else {
-        // continueing timer
+        // continuing timer
         currentTime = new Date();
         const minutes = Math.floor((pastTime % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((pastTime % (1000 * 60)) / 1000);

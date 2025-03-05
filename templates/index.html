@@ -4,11 +4,11 @@
         <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Promodoro App</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-        <link rel="stylesheet" href="css/styles.css"/>
+        <link rel="stylesheet" href="/static/css/styles.css"/>
         <!-- <script src="js/timer.js"></script> -->
-         <script src="js/timerV2.js"></script>
+         <script src="/static/js/timerV2.js"></script>
          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-         <script src="js/chart-data.js"></script>
+         <script src="/static/js/chart-data.js"></script>
     </head>
     <body>
         <nav class="custom-navbar">
@@ -23,6 +23,7 @@
         <!-- Navigation End -->
         <section class="container text-center timer-section">
             <h3 class="session-title display-6">session title</h3>
+            <h4 class="task-title display-6"></h4>
             <div class="timer">
             </div>
             <button id="start-timer-button" class="btn btn-secondary">Start</button>
@@ -30,6 +31,32 @@
             <button id="skip-session" class="btn btn-secondary">Skip</button>
             <hr/>
             <h2>Promodoro:<span class="promodoro-count"></span></h2>
+            <!-- Task Input form -->
+            <form class="task-input-form" action="/create-task" method="post">
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                      <button class="btn btn-outline-secondary" type="submit">Add New Task</button>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Enter task" aria-describedby="basic-addon1" name="task" >
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                      <label class="input-group-text" for="inputGroupSelect01">Select Task</label>
+                    </div>
+                    <select class="custom-select" id="task-select-main" name="task">
+                        <option value="none">None</option>
+                        {% for task in items %}
+                            <option value="{{ task }}">{{ task }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </form>
+            <audio id="audio">
+                <source src="/static/audio/SFX_alert4.wav" type="audio/wav"/>
+            </audio>
         </section>
        
   
@@ -62,10 +89,25 @@
                                 <input type="number" class="form-control" id="break-interval-input" placeholder="4">
                             </div>
                         </form>
+                        <hr/>
+                        <form action="/delete-task" method="post">
+                            <div class="form-group break-interval">
+                                <label for="delete-task-input">Delete Task</label>
+                                <input type="text" class="form-control" id="delete-task-input" name="task" placeholder="Enter task to delete">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-secondary">Confirm</button>
+                            </div>
+                        </form>
+                    </div>
+                    <hr/>
+                    <div class="text-center">
+                        <form action="/delete-all-tasks" method="post">
+                            <button type="submit" class="btn btn-danger delete-all-btn">Delete All Tasks</button>
+                        </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="save-changes">Save Changes</button>
-                        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
                     </div>
                 </div>
             </div>
@@ -73,7 +115,7 @@
 
         <!-- Stats Modal -->
         <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="exampleModalLabel">Statistics</h1>
@@ -85,12 +127,13 @@
 
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <label class="input-group-text" for="task-select">Tasks</label>
+                                <label class="input-group-text" for="task-select-stats">Select Tasks</label>
                             </div>
-                            <select class="custom-select" id="task-select">
-                                <option selected>Select task</option>
-                                <option value="python programming">No Task</option>
-                                <option value="chinese">Chinese</option>
+                            <select class="custom-select" id="task-select-stats" name="task">
+                                <option value="none" selected>None</option>
+                                {% for task in items %}
+                                    <option value="{{ task }}">{{ task }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         

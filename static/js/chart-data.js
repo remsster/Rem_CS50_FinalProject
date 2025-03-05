@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     selectedData = d1[0].task;
-    console.log(selectedData);
+    // console.log(selectedData);
 
     let dates = [];
     let sessions = [];
@@ -118,24 +118,22 @@ document.addEventListener("DOMContentLoaded", () => {
     //     d1.filter((x) => x.task == selectedData)[0].data.map((y) => y.sessions)
     // );
 
-    console.log()
-
-    taskSelectTag.addEventListener("change", () => {
+    // taskSelectTag.addEventListener("change", () => {
         // console.log("changed: " + taskSelectTag.value);
-        selectedData = taskSelectTag.value;
-        dates = d1.filter((x) => x.task == selectedData)[0].data.map((y) => {
+        // selectedData = taskSelectTag.value;
+        // dates = d1.filter((x) => x.task == selectedData)[0].data.map((y) => {
             
-            y.date.getDate() + "/" + (y.date.getMonth() + 1)
-        });
-        sessions = d1.filter((x) => x.task == selectedData)[0].data.map((y) => y.sessions);
-    })
+        //     y.date.getDate() + "/" + (y.date.getMonth() + 1)
+        // });
+        // sessions = d1.filter((x) => x.task == selectedData)[0].data.map((y) => y.sessions);
+    // });
 
     // let dates = d2.map((x) => { 
     //     return dateString = x.date.getDate() + "/" + (x.date.getMonth() + 1);
     // });
     // let sessions = d2.map((x) => x.sessions);
 
-    console.log(dates);
+    // console.log(dates);
     // console.log(sessions);
 
     // crateChart(dates,sessions);

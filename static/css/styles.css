@@ -44,3 +44,11 @@
     width: 50%;
 }
 
+.task-input-form {
+    width: 50%;
+    margin: 15px auto;
+}
+
+.delete-all-btn {
+    margin: 20px auto;
+}
