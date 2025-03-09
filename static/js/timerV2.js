@@ -36,6 +36,7 @@ let currentTask = "None";
 // Date objects
 let currentTime = undefined;
 let endTime = undefined;
+let currentDate = undefined;
 
 // SetInterval object
 let timer = undefined;
@@ -61,11 +62,7 @@ let states = {
 
 
 // Initialize Variables
-document.addEventListener("DOMContentLoaded",() => {
-    
-
-    // console.log(promodoro);
-    
+document.addEventListener("DOMContentLoaded",() => {    
     currentState = states.work;
     timerContainer = document.querySelector(".timer");
     sessionTitle = document.querySelector(".session-title");
@@ -81,6 +78,9 @@ document.addEventListener("DOMContentLoaded",() => {
     taskTitle = document.querySelector(".task-title");
 
     audioTag = document.querySelector("#audio");
+    audioTag.volume = 0.2;
+
+    currentDate = new Date();
     
     workInput = document.querySelector("#work-input");
     shortBreakInput = document.querySelector("#short-break-input");
@@ -110,9 +110,10 @@ document.addEventListener("DOMContentLoaded",() => {
     skipSessionButton.addEventListener("click", skipSession);
     saveChangesButton.addEventListener("click", saveChanges);
 
-    fetch("http://localhost:5000/current-task").then(response => {
+
+    fetch("http://localhost:5000/current-task/" + mainTaskSelectTag.value).then(response => {
         if (!response.ok) {
-            throw new Error("Network response was to okay fetching todays data")
+            throw new Error("Network response was not okay fetching todays data");
         }
         return response.json();
     }).then(result => {
@@ -123,6 +124,7 @@ document.addEventListener("DOMContentLoaded",() => {
         console.error("Error: ", err);
     });
 
+    getPromodoroData();
 });
 
 // Format time to look more presentable
@@ -171,6 +173,11 @@ function finishSession() {
         promodoro += 1;
 
         const today = new Date();
+        if (currentDate.getDate() != today.getDate()) {
+            // set promodoro to 1 for new day
+            promodoro = 1;
+            currentDate = today;
+        }
         fetch("http://localhost:5000/process",{
             method: "POST",
             body: JSON.stringify(
@@ -223,7 +230,21 @@ function SetupSession() {
 // ------------------------------------------------------
 
 function changeTask() {
-    console.log(mainTaskSelectTag.selectedIndex);
+    // console.log(mainTaskSelectTag.selectedIndex);
+    const task = mainTaskSelectTag.value;
+    console.log(task);
+    fetch("http://localhost:5000/current-task/" + task).then(response => {
+        return response.json();
+    }).then(result => {
+        console.log(result);
+        promodoro = result["promodoro"];
+        promodoroTag.innerHTML = promodoro;
+    }).catch(err => {
+        console.error("Error:", err);
+        promodoro = 0;
+        promodoroTag.innerHTML = promodoro;
+    });
+
     if (mainTaskSelectTag.value == "none") {
         taskTitle.innerHTML = "";
     } else {

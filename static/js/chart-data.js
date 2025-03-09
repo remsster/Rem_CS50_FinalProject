@@ -8,11 +8,15 @@ let selectedData = undefined;
 let taskSelectTag = undefined;
 let chartTitleTag = undefined;
 
+let promodoroData = undefined;
+
 document.addEventListener("DOMContentLoaded", () => {
     ctx = document.getElementById("chart");
     getDataButton = document.querySelector("#show-chart-data");
     taskSelectTag = document.querySelector("#task-select");
     chartTitleTag = document.querySelector(".chart-title");
+
+    
 
     let d1 = [
         {
@@ -140,21 +144,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     getDataButton.addEventListener("click", () => { 
         chartTitleTag.innerHTML = selectedData;
+        getPromodoroData();
         crateChart(dates,sessions);
     });
 
     
 });
 
+function getPromodoroData() {
+    fetch("http://localhost:5000/process").then(response => {
+        return response.json();
+    }).then(result => {
+        console.log(result);
+    }).catch(err => {
+        console.error("Error:", err);
+    });
+}
+
 function crateChart(dates, sessions) {
     if (myChart) { myChart.destroy(); }
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: dates,
+          labels: ["A","B","C","D","E"],
           datasets: [{
             label: '# of Sessions',
-            data: sessions,
+            data: [10,23,14,5,28],
             borderWidth: 1
           }]
         },
