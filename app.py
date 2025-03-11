@@ -7,14 +7,23 @@ connect = sqlite3.connect("test.db",check_same_thread=False)
 
 app = Flask(__name__)
 
+success = False
+message = ""
 @app.route("/")
 def index():
     # get all task
+
     cursor = connect.cursor()
     tasks = cursor.execute("SELECT name FROM tasks WHERE name != ?",("none",)).fetchall()
+    # print("task names ", tasks)
     tasks = map(lambda row: row[0], tasks)
     cursor.close()
-    return render_template("index.html",items=tasks)
+    data = {
+        "success": success,
+        "message": message,
+        "tasks": tasks
+    }
+    return render_template("index.html", **data)
 
 @app.route("/current-task/<string:current_task>")
 def current_task(current_task):
@@ -25,7 +34,7 @@ def current_task(current_task):
     task = current_task
 
     cursor = connect.cursor()
-    current_task_data = cursor.execute("SELECT * FROM tasks WHERE name = ?",(task,)).fetchall()[0]
+    current_task_data = cursor.execute("SELECT * FROM tasks WHERE name = ?",(str(task),)).fetchall()[0]
     today = datetime.now()
     
     row_exists = cursor.execute("SELECT EXISTS(SELECT * FROM work_session WHERE task_id = ? AND work_year = ? AND work_month = ? AND work_day = ?)",
@@ -47,7 +56,6 @@ def current_task(current_task):
 @app.route("/process", methods = ["GET","POST"])
 def process():
     if request.method == "GET":
-        
         
         cursor = connect.cursor()
         data = cursor.execute(
@@ -110,11 +118,10 @@ def process():
         
         connect.commit()
         cursor.close()
-        
-    return "process route"
 
 @app.route("/create-task", methods = ["POST"])
 def create_task():
+    success = False
     if request.method == "POST":
         task = request.form.get("task")
         if not task:
@@ -131,7 +138,12 @@ def create_task():
         # Save changes to database
         connect.commit()
         cursor.close()
-        
+        success = True
+        message = "Added new task"
+        data = {
+            "success":success,
+            "message":message
+        }
         return redirect("/", code=302)
 
 @app.route("/delete-task", methods = ["POST"])
@@ -150,7 +162,7 @@ def delete_task():
                 cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
             connect.commit()
             cursor.close()
-            
+        
         return redirect("/", code=302)
 
 @app.route("/delete-all-tasks", methods = ["POST"])

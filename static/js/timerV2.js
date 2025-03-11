@@ -248,7 +248,7 @@ function changeTask() {
     if (mainTaskSelectTag.value == "none") {
         taskTitle.innerHTML = "";
     } else {
-        taskTitle.innerHTML = mainTaskSelectTag.value;
+        taskTitle.innerHTML = "Current Task: " + mainTaskSelectTag.value;
     }
 }
 

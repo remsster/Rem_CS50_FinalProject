@@ -155,7 +155,7 @@ function getPromodoroData() {
     fetch("http://localhost:5000/process").then(response => {
         return response.json();
     }).then(result => {
-        console.log(result);
+        // console.log(result);
     }).catch(err => {
         console.error("Error:", err);
     });

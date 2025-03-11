@@ -9,8 +9,14 @@
          <script src="/static/js/timerV2.js"></script>
          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
          <script src="/static/js/chart-data.js"></script>
+         <script src="/static/js/validate.js"></script>
     </head>
     <body>
+        {% if success %}
+        <div class="alert alert-success" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
         <nav class="custom-navbar">
             <div>
                 <a class="navbar-brand" href="#">Promodoro</a>
@@ -32,13 +38,13 @@
             <hr/>
             <h2>Promodoro:<span class="promodoro-count"></span></h2>
             <!-- Task Input form -->
-            <form class="task-input-form" action="/create-task" method="post">
+            <form class="task-input-form" id="task-input-form" action="/create-task" method="post">
 
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                      <button class="btn btn-outline-secondary" type="submit">Add New Task</button>
+                      <button class="btn btn-outline-secondary" id="submit-task-button" type="submit">Add New Task</button>
                     </div>
-                    <input type="text" class="form-control" placeholder="Enter task" aria-describedby="basic-addon1" name="task" >
+                    <input type="text" class="form-control" placeholder="Enter task" id="task-input" aria-describedby="basic-addon1" name="task" >
                 </div>
 
                 <div class="input-group mb-3">
@@ -47,7 +53,7 @@
                     </div>
                     <select class="custom-select" id="task-select-main" name="task">
                         <option value="none">None</option>
-                        {% for task in items %}
+                        {% for task in tasks %}
                             <option value="{{ task }}">{{ task }}</option>
                         {% endfor %}
                     </select>
