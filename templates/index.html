@@ -42,6 +42,7 @@
             <hr/>
             <h2>Promodoro:<span class="promodoro-count"></span></h2>
             <!-- Task Input form -->
+            
             <form class="task-input-form" id="task-input-form" action="/create-task" method="post">
 
                 <div class="input-group mb-3">
@@ -64,6 +65,7 @@
                 </div>
 
             </form>
+            
             <audio id="audio">
                 <source src="/static/audio/SFX_alert4.wav" type="audio/wav"/>
             </audio>
@@ -133,15 +135,34 @@
                     </div>
                     <div class="modal-body">
                         <h2 class="display-6 chart-title"></h2>
+                        <div class="input-group col-sm">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="month-select-stats">Month</label>
+                            </div>
+                            <select class="custom-select" id="month-select-stats">
+                                <option value="0">Select Month</option>
+                                <option value="1">January</option>
+                                <option value="2">Febuary</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
                         <canvas id="chart"></canvas>
-
-                        <div class="input-group">
+                        <div class="input-group col-sm">
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="task-select-stats">Select Tasks</label>
                             </div>
                             <select class="custom-select" id="task-select-stats" name="task">
                                 <option value="none" selected>None</option>
-                                {% for task in items %}
+                                {% for task in tasks %}
                                     <option value="{{ task }}">{{ task }}</option>
                                 {% endfor %}
                             </select>

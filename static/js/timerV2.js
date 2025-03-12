@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded",() => {
         console.error("Error: ", err);
     });
 
-    getPromodoroData();
+    // getPromodoroData();
 });
 
 // Format time to look more presentable

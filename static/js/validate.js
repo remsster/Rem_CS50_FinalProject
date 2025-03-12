@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded",() => {
     alertBar = document.querySelector("#warning");
     alertBar.style.display = "none"
     
-
     taskInputForm.addEventListener("submit",(e) => {
         e.preventDefault();
         if (validateInput(taskInput.value))
@@ -36,7 +35,7 @@ function validateInput(text) {
     }
 
     if (!specialPattern.test(text)) {
-        showAlertBarWithMessage("Contains special characters, replace spaces with underscores _");
+        showAlertBarWithMessage("Contains special characters, replace spaces with underscores(_)");
         return false;
     }
 
@@ -46,11 +45,14 @@ function validateInput(text) {
             return false;
         }
     }
-
     return true;
 }
 
+// Hide alert message after 5 seconds
 function showAlertBarWithMessage(message) {
     alertBar.style.display = "block";
     alertBar.innerHTML = message;
+    setTimeout(() => {
+       alertBar.style.display = "none"; 
+    }, 5000);
 }

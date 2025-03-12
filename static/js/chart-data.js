@@ -7,169 +7,70 @@ let myChart = undefined;
 let selectedData = undefined;
 let taskSelectTag = undefined;
 let chartTitleTag = undefined;
+let monthSelectTag = undefined;
 
+let data = undefined;
 let promodoroData = undefined;
 
 document.addEventListener("DOMContentLoaded", () => {
     ctx = document.getElementById("chart");
     getDataButton = document.querySelector("#show-chart-data");
-    taskSelectTag = document.querySelector("#task-select");
+    taskSelectTag = document.querySelector("#task-select-stats");
     chartTitleTag = document.querySelector(".chart-title");
-
-    
-
-    let d1 = [
-        {
-            task: "python programming",
-            data: [
-                {
-                    date: new Date("2025-02-21"),
-                    sessions: 10
-                },
-                {
-                    date: new Date("2025-02-22"),
-                    sessions: 6
-                },
-                {
-                    date: new Date("2025-02-23"),
-                    sessions: 2
-                },
-            ]
-        },
-        {
-            task: "chinese",
-            data: [
-                {
-                    date: new Date("2025-02-21"),
-                    sessions: 4
-                },
-                {
-                    date: new Date("2025-02-22"),
-                    sessions: 8
-                },
-                {
-                    date: new Date("2025-02-23"),
-                    sessions: 12
-                },
-                {
-                    date: new Date("2025-02-24"),
-                    sessions: 6
-                },
-                {
-                    date: new Date("2025-02-25"),
-                    sessions: 5
-                },
-                {
-                    date: new Date("2025-02-26"),
-                    sessions: 3
-                },
-                {
-                    date: new Date("2025-02-27"),
-                    sessions: 4
-                },
-                {
-                    date: new Date("2025-02-28"),
-                    sessions: 10
-                },
-                {
-                    date: new Date("2025-03-01"),
-                    sessions: 3
-                },
-            ]
-        },
-
-
-    ];
-
-    let d2 = [
-        {
-            date: new Date("2025-02-21"),
-            sessions: 4
-        },
-        {
-            date: new Date("2025-02-22"),
-            sessions: 8
-        },
-        {
-            date: new Date("2025-02-23"),
-            sessions: 12
-        },
-        {
-            date: new Date("2025-02-24"),
-            sessions: 2
-        },
-        {
-            date: new Date("2025-02-25"),
-            sessions: 6
-        },
-        {
-            date: new Date("2025-02-26"),
-            sessions: 9
-        },
-        {
-            date: new Date("2025-02-27"),
-            sessions: 4
-        },
-    ];
-
-    selectedData = d1[0].task;
-    // console.log(selectedData);
+    monthSelectTag = document.querySelector("#month-select-stats");
 
     let dates = [];
     let sessions = [];
 
-    // console.log(
-    //     d1.filter((x) => x.task == selectedData)[0].data.map((y) => y.sessions)
-    // );
+    getDataButton.addEventListener("click", async () => { 
+        await getPromodoroData();
+        console.log(taskSelectTag.value);
+        if (taskSelectTag.value == "none") {
+            chartTitleTag.innerHTML = "Data for no task";
+        } else {
+            chartTitleTag.innerHTML = "Task: " + taskSelectTag.value;
+        }
+        let dates = [];
+        let sessions = [];
+        selectedData = data[taskSelectTag.value];
+        try{
+            selectedData.forEach((curr) => {
+                if (curr["month"] == monthSelectTag.value) {
+                    sessions.push(curr["promodoro"]);
+                    dates.push(`${curr["date"]}/${curr["month"]}`)
 
-    // taskSelectTag.addEventListener("change", () => {
-        // console.log("changed: " + taskSelectTag.value);
-        // selectedData = taskSelectTag.value;
-        // dates = d1.filter((x) => x.task == selectedData)[0].data.map((y) => {
-            
-        //     y.date.getDate() + "/" + (y.date.getMonth() + 1)
-        // });
-        // sessions = d1.filter((x) => x.task == selectedData)[0].data.map((y) => y.sessions);
-    // });
-
-    // let dates = d2.map((x) => { 
-    //     return dateString = x.date.getDate() + "/" + (x.date.getMonth() + 1);
-    // });
-    // let sessions = d2.map((x) => x.sessions);
-
-    // console.log(dates);
-    // console.log(sessions);
-
-    // crateChart(dates,sessions);
-
-    getDataButton.addEventListener("click", () => { 
-        chartTitleTag.innerHTML = selectedData;
-        getPromodoroData();
+                }
+            });
+        } catch(err) {
+            chartTitleTag.innerHTML = "No data for " + taskSelectTag.value;
+        }
         crateChart(dates,sessions);
     });
-
-    
+    getPromodoroData();
 });
 
-function getPromodoroData() {
+async function getPromodoroData() {
     fetch("http://localhost:5000/process").then(response => {
         return response.json();
     }).then(result => {
-        // console.log(result);
+        data = result;
+        console.log("data", data);
     }).catch(err => {
         console.error("Error:", err);
     });
 }
 
+
 function crateChart(dates, sessions) {
+    
     if (myChart) { myChart.destroy(); }
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ["A","B","C","D","E"],
+          labels: dates,
           datasets: [{
             label: '# of Sessions',
-            data: [10,23,14,5,28],
+            data: sessions,
             borderWidth: 1
           }]
         },

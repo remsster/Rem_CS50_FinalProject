@@ -21,7 +21,7 @@ def index():
     data = {
         "success": success,
         "message": message,
-        "tasks": tasks
+        "tasks": list(tasks)
     }
     return render_template("index.html", **data)
 
@@ -61,7 +61,29 @@ def process():
         data = cursor.execute(
                 "SELECT t.name, w.promodoro, w.work_year, w.work_month, w.work_day FROM tasks t INNER JOIN work_session w ON w.task_id = t.id").fetchall()
         cursor.close()
-        return data
+
+        # Organize chart data
+        names = []
+
+        for row in data:
+            names.append(row[0])
+        names = set(names)
+
+        data_dict = {}
+        for name in names:
+            if name not in data_dict:
+                data_dict[name] = []
+        
+        for x in data:
+            row_data = {
+                "promodoro": x[1],
+                "year": x[2],
+                "month": x[3],
+                "date": x[4],
+            }
+            data_dict[x[0]].append(row_data)
+        # Organize chart data END
+        return data_dict
 
     if request.method == "POST":
         data = request.json
