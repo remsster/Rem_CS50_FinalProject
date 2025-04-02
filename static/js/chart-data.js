@@ -24,19 +24,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     getDataButton.addEventListener("click", async () => { 
         await getPromodoroData();
-        console.log(data);
-        if (taskSelectTag.value == "none") {
-            chartTitleTag.innerHTML = "Data for no task";
-        } else {
-            chartTitleTag.innerHTML = "Task: " + taskSelectTag.value;
-        }
-        let dates = [];
-        let sessions = [];
         let currentYear = new Date().getFullYear();
-        selectedData = data[taskSelectTag.value];
         if (yearSelectTag.value != "none"){
             currentYear = yearSelectTag.value;
         }
+        if (taskSelectTag.value == "none") {
+            chartTitleTag.innerHTML = "Data for no task - " + currentYear;
+        } else {
+            chartTitleTag.innerHTML = "Task: " + taskSelectTag.value + " - " + currentYear;
+        }
+        
+        let dates = [];
+        let sessions = [];
+        selectedData = data[taskSelectTag.value];
+        
         try{
             selectedData.forEach((curr) => {
                 if (curr["month"] == monthSelectTag.value && (curr["year"] == currentYear)) {
