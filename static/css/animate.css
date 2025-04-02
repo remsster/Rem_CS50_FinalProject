@@ -1,0 +1,35 @@
+:root {
+    --focus-dark: #113;
+    --focus-light: #aad;
+    --paused-light: #fff;
+    --paused-dark: #000;
+}
+
+@keyframes trigger-dark-focus-view {
+    /* go from light ro dark */
+    from {
+        background-color: var(--paused-light);
+        color: var(--paused-dark);
+    }
+    to {
+        background-color: var(--focus-dark);
+        color: var(--focus-light);
+    }
+}
+
+@keyframes trigger-light-focus-view {
+    /* go from dark to light */
+    from {background-color: var(--focus-dark);}
+    to {background-color: var(--paused);}
+}
+
+@keyframes end-focus-view {
+    from {
+        background-color: var(--focus-dark);
+        color: var(--paused-light);
+    }
+    to {
+        background-color: var(--paused-light);
+        color: var(--paused-dark);
+    }
+}

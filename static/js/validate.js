@@ -38,7 +38,7 @@ function validateInput(text) {
         showAlertBarWithMessage("Contains special characters, replace spaces with underscores(_)");
         return false;
     }
-
+    text = text.toLowerCase();
     for (let i = 0; i < mainTaskSelectTag.length; i ++) {
         if (text === mainTaskSelectTag[i].value) {
             showAlertBarWithMessage("Task already exists");

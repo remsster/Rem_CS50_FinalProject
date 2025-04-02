@@ -8,6 +8,7 @@ let selectedData = undefined;
 let taskSelectTag = undefined;
 let chartTitleTag = undefined;
 let monthSelectTag = undefined;
+let yearSelectTag = undefined;
 
 let data = undefined;
 let promodoroData = undefined;
@@ -18,13 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
     taskSelectTag = document.querySelector("#task-select-stats");
     chartTitleTag = document.querySelector(".chart-title");
     monthSelectTag = document.querySelector("#month-select-stats");
+    yearSelectTag = document.querySelector("#year-select-stats");
 
-    let dates = [];
-    let sessions = [];
 
     getDataButton.addEventListener("click", async () => { 
         await getPromodoroData();
-        console.log(taskSelectTag.value);
+        console.log(data);
         if (taskSelectTag.value == "none") {
             chartTitleTag.innerHTML = "Data for no task";
         } else {
@@ -32,13 +32,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         let dates = [];
         let sessions = [];
+        let currentYear = new Date().getFullYear();
         selectedData = data[taskSelectTag.value];
+        if (yearSelectTag.value != "none"){
+            currentYear = yearSelectTag.value;
+        }
         try{
             selectedData.forEach((curr) => {
-                if (curr["month"] == monthSelectTag.value) {
+                if (curr["month"] == monthSelectTag.value && (curr["year"] == currentYear)) {
                     sessions.push(curr["promodoro"]);
                     dates.push(`${curr["date"]}/${curr["month"]}`)
-
                 }
             });
         } catch(err) {
@@ -54,7 +57,6 @@ async function getPromodoroData() {
         return response.json();
     }).then(result => {
         data = result;
-        console.log("data", data);
     }).catch(err => {
         console.error("Error:", err);
     });

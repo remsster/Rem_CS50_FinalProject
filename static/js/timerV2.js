@@ -47,11 +47,11 @@ let promodoro = 0
 let currentState = undefined;
 let states = {
     work: {
-        time: 1,
+        time: 25,
         title: "Focus"
     },
     shortBreak: {
-        time: 1,
+        time: 5,
         title: "Short Break"
     },
     longBreak: {

@@ -15,13 +15,15 @@ def index():
 
     cursor = connect.cursor()
     tasks = cursor.execute("SELECT name FROM tasks WHERE name != ?",("none",)).fetchall()
-    # print("task names ", tasks)
+    work_years = cursor.execute("SELECT work_year FROM work_session").fetchall();
     tasks = map(lambda row: row[0], tasks)
+    work_years = map(lambda row: row[0], work_years)
     cursor.close()
     data = {
         "success": success,
         "message": message,
-        "tasks": list(tasks)
+        "tasks": list(tasks),
+        "work_years": set(work_years)
     }
     return render_template("index.html", **data)
 
@@ -37,13 +39,13 @@ def current_task(current_task):
     current_task_data = cursor.execute("SELECT * FROM tasks WHERE name = ?",(str(task),)).fetchall()[0]
     today = datetime.now()
     
+    # Check if todays task exists
     row_exists = cursor.execute("SELECT EXISTS(SELECT * FROM work_session WHERE task_id = ? AND work_year = ? AND work_month = ? AND work_day = ?)",
         (current_task_data[0], today.year, today.month, today.day)).fetchall()
 
     if row_exists[0][0] == 1:
         todays_session = cursor.execute("SELECT * FROM work_session WHERE task_id = ? AND work_year = ? AND work_month = ? AND work_day = ?",
             (current_task_data[0], today.year, today.month, today.day)).fetchall()[0]
-        print("today sesssion: ", todays_session)
         data = {
             "promodoro": todays_session[2]
         }
@@ -93,6 +95,7 @@ def process():
         date = data["date"]
         task = data["task"]
 
+        # Post error checking
         if not promodoro:
             return "no promodoro count infomation"
         try:
@@ -111,8 +114,9 @@ def process():
         
         if not task:
             return "no task data"
-        
-        print("processing data")
+
+        # Post error checking END
+
         cursor = connect.cursor()
         task_exists = cursor.execute("SELECT EXISTS(SELECT * FROM tasks WHERE name = ?)", (task,)).fetchall()
         task_exists = list(map(lambda row: row[0], task_exists))[0]
@@ -126,9 +130,6 @@ def process():
                 SELECT * FROM work_session
                  WHERE work_year = ? AND work_month = ? AND work_day = ? AND task_id = ?)""",(year,month,date,task_id)).fetchall()
 
-        print("task_id", task_id)
-        print("row exists", row_exists[0][0])
-
         if row_exists[0][0] == 1:
             # update table
             print("updating existing work_session row")
@@ -141,10 +142,14 @@ def process():
         connect.commit()
         cursor.close()
 
+        return "process success"
+
 @app.route("/create-task", methods = ["POST"])
 def create_task():
     success = False
     if request.method == "POST":
+
+        # Post error checking
         task = request.form.get("task")
         if not task:
             return "no task to add"
@@ -155,14 +160,14 @@ def create_task():
 
         if task_exists == 1:
             return "Task already exists"
-        
+        # Post error checking END
         cursor.execute("INSERT INTO tasks(name) VALUES(?)", (task,))
         # Save changes to database
         connect.commit()
         cursor.close()
         success = True
         message = "Added new task"
-        data = {
+        success_data = {
             "success":success,
             "message":message
         }
@@ -173,7 +178,7 @@ def delete_task():
     if request.method == "POST":
         task = request.form.get("task")
         if not task:
-            print("no task to delete")
+            return "no task to delete"
         else:
             task = task.lower()
             cursor = connect.cursor()
@@ -190,7 +195,8 @@ def delete_task():
 @app.route("/delete-all-tasks", methods = ["POST"])
 def delete_all_tasks():
     if request.method == "POST":
-
+        # deletes all data in the database
+        # would need to be changed if individual users are added
         cursor = connect.cursor()
         cursor.execute("DELETE FROM work_session")
         cursor.execute("DELETE FROM tasks")

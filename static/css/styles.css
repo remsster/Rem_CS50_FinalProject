@@ -1,6 +1,18 @@
+
+
 *{
     padding: 0;
     margin: 0;
+    font-family: "Mukta Mahee", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+body, select, button, label, input {
+    /* background-color: var(--focus) !important; */
+    /* animation-name: toggle-focus;
+    animation-duration: 3s;
+    animation-fill-mode: forwards; */
 }
 
 .custom-navbar {
@@ -51,4 +63,12 @@
 
 .delete-all-btn {
     margin: 20px auto;
+}
+
+.add-task-div {
+    /* display: none; */
+}
+
+#close-add-task {
+    padding-top: 1rem;
 }
